@@ -167,7 +167,7 @@ function MenuSection({ onAdd }: { onAdd: (product: Product) => void }) {
       <div className="shell">
         <div className="section-heading reveal">
           <div><span className="section-kicker">منيو كابيتانو</span><h2>اختار اللي على مزاجك</h2></div>
-          <p>الأسعار بالجنيه المصري. دوس «أضف للطلب»، اكتب بياناتك، وبعدها ابعت الطلب بنفسك على واتساب.</p>
+          <p>دوس «أضف للطلب»، كمل اختياراتك، وبعدها افتح طلبك واكتب بياناتك مرة واحدة.</p>
         </div>
         <div className="category-tabs" role="tablist" aria-label="أقسام المنيو">
           {categories.map((category) => (

@@ -163,6 +163,7 @@ export default function OrdersPage() {
         <nav className="admin-module-nav" aria-label="أقسام لوحة الموظف">
           <Link className="active" href="/admin/orders">📦 الطلبات</Link>
           <Link href="/admin/customers">⭐ نقاط العملاء</Link>
+          <Link href="/admin/revenue">💰 الإيرادات</Link>
         </nav>
         <div className="admin-tools">
           <label className="admin-search"><span>🔎</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="بحث برقم الطلب أو الهاتف أو اسم العميل" /></label>
@@ -171,7 +172,7 @@ export default function OrdersPage() {
 
         <div className="status-tabs" role="tablist" aria-label="حالات الطلبات">
           {filters.map((item) => (
-            <button type="button" role="tab" aria-selected={filter === item.id} className={filter === item.id ? "active" : ""} key={item.id} onClick={() => setFilter(item.id)}>
+            <button type="button" role="tab" aria-selected={filter === item.id} className={`filter-${item.id} ${filter === item.id ? "active" : ""}`} key={item.id} onClick={() => setFilter(item.id)}>
               <span>{item.icon}</span><b>{item.label}</b><i>{countFor(item.id)}</i>
             </button>
           ))}
@@ -212,13 +213,13 @@ export default function OrdersPage() {
                   </div>
                 ) : <div className="store-order-note">🛍️ شراء مباشر من المحل</div>}
                 <div className="admin-total"><span>الإجمالي</span><strong>{Number(order.total)} جنيه</strong></div>
-                <div className="order-actions">
-                  {!(["delivered", "cancelled"] as OrderStatus[]).includes(order.status) && (
+                {!(["delivered", "cancelled"] as OrderStatus[]).includes(order.status) && (
+                  <div className="order-actions">
                     <button type="button" className="next-status" disabled={busyOrder === order.id} onClick={() => deliverOrder(order)}>
                       {busyOrder === order.id ? "جاري التحديث..." : "تم التسليم"}
                     </button>
-                  )}
-                </div>
+                  </div>
+                )}
               </article>
             ))}
           </div>

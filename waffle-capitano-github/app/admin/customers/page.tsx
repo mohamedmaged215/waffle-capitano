@@ -91,6 +91,7 @@ export default function CustomersPage() {
         <nav className="admin-module-nav" aria-label="أقسام لوحة الموظف">
           <Link href="/admin/orders">📦 الطلبات</Link>
           <Link className="active" href="/admin/customers">⭐ نقاط العملاء</Link>
+          <Link href="/admin/revenue">💰 الإيرادات</Link>
         </nav>
 
         <div className="phone-identity-note"><span>📱</span><div><b>رقم الهاتف هو حساب العميل</b><p>حتى لو العميل استخدم أسماء مختلفة، كل مشترياته ونقاطه تفضل على نفس الرقم.</p></div></div>
