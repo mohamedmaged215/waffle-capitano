@@ -185,6 +185,31 @@ function MenuSection({ onAdd }: { onAdd: (product: Product) => void }) {
 }
 
 function LoyaltySection() {
+  const [phone, setPhone] = useState("");
+  const [points, setPoints] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function lookupPoints(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
+    setError("");
+    setPoints(null);
+
+    const { data, error: lookupError } = await supabase.rpc("dessert_lookup_points", {
+      customer_phone_input: phone.trim(),
+    });
+
+    if (lookupError || !data?.[0]) {
+      setError("رقم الموبايل غير صحيح. اكتبه 11 رقم زي 01XXXXXXXXX.");
+      setLoading(false);
+      return;
+    }
+
+    setPoints(Number(data[0].points_balance) || 0);
+    setLoading(false);
+  }
+
   return (
     <section className="section loyalty" id="loyalty">
       <div className="shell loyalty-grid">
@@ -198,15 +223,19 @@ function LoyaltySection() {
             <div><span>03</span><p><b>استبدل</b> نقاطك بهدايا</p></div>
           </div>
         </div>
-        <div className="account-card reveal" aria-label="نموذج حساب نقاط العميل">
+        <div className="account-card reveal" aria-label="معرفة رصيد نقاط العميل">
           <div className="account-head">
-            <div><small>حساب كابيتانو</small><h3>أهلاً يا محمد</h3><p dir="ltr">010 •••• 2148</p></div>
-            <div className="qr-demo" aria-label="مكان كود QR المستقبلي"><span /><span /><span /><span /></div>
+            <div><small>حساب كابيتانو</small><h3>اعرف نقاطك</h3><p>رقم موبايلك هو رقم حسابك عندنا</p></div>
+            <div className="points-star" aria-hidden="true">★</div>
           </div>
-          <div className="points-balance"><small>رصيدك الحالي</small><p><strong>17</strong> نقطة</p><div><i style={{ width: "70%" }} /></div><span>فاضلك 3 نقط على المكافأة الجاية</span></div>
-          <div className="reward-row"><div className="reward-icon">10</div><p><b>علبة جاتوه صغيرة</b><span>10 نقاط</span></p><span className="claimed">متاحة</span></div>
-          <div className="reward-row locked"><div className="reward-icon">20</div><p><b>كيلو بسبوسة</b><span>20 نقطة</span></p><span>3 نقط</span></div>
-          <p className="account-note">امسح الكود عند الكاشير، ونقاط الزيارة هتضاف لنفس حسابك.</p>
+          <form className="points-lookup" onSubmit={lookupPoints}>
+            <label htmlFor="points-phone">اكتب رقم الموبايل</label>
+            <div><input id="points-phone" value={phone} onChange={(event) => setPhone(event.target.value)} inputMode="tel" dir="ltr" required placeholder="01XXXXXXXXX" autoComplete="tel" /><button type="submit" disabled={loading}>{loading ? "جاري البحث..." : "اعرض نقاطي"}</button></div>
+          </form>
+          {error && <p className="points-error" role="alert">{error}</p>}
+          {points !== null ? (
+            <div className="points-balance real-balance" role="status"><small>رصيدك الحالي</small><p><strong>{points}</strong> نقطة</p><span>{points === 0 ? "أول ما تستلم طلبك هتبدأ تجمع نقاط" : "كل 100 جنيه = نقطة واحدة"}</span></div>
+          ) : <p className="account-note">اكتب نفس الرقم اللي بتطلب بيه، وهتظهر نقاطك فورًا من غير اسم أو تفاصيل طلبات.</p>}
         </div>
       </div>
     </section>

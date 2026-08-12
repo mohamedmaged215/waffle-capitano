@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -153,6 +154,10 @@ export default function OrdersPage() {
       </header>
 
       <section className="admin-content">
+        <nav className="admin-module-nav" aria-label="أقسام لوحة الموظف">
+          <Link className="active" href="/admin/orders">📦 الطلبات</Link>
+          <Link href="/admin/customers">⭐ نقاط العملاء</Link>
+        </nav>
         <div className="admin-tools">
           <label className="admin-search"><span>🔎</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="بحث برقم الطلب أو الهاتف أو اسم العميل" /></label>
           <button type="button" className="add-purchase" onClick={() => setStoreOpen(true)}>＋ إضافة شراء من المحل</button>

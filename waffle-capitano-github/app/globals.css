@@ -115,6 +115,17 @@ img { display: block; max-width: 100%; }
 .account-head small { color: var(--teal-dark); font-weight: 800; }
 .account-head h3 { margin: 4px 0; font-size: 25px; }
 .account-head p { margin: 0; color: #92796f; font-size: 13px; }
+.points-star { width: 66px; height: 66px; display:grid; place-items:center; border-radius:18px; background:var(--gold); color:var(--brown); font-size:34px; box-shadow:inset 0 0 0 5px rgba(255,255,255,.45); }
+.points-lookup { margin-top:24px; display:grid; gap:8px; }
+.points-lookup label { color:var(--brown); font-size:13px; font-weight:900; }
+.points-lookup > div { display:grid; grid-template-columns:1fr auto; gap:8px; }
+.points-lookup input { min-width:0; height:52px; padding:0 14px; border:1px solid rgba(59,27,18,.16); border-radius:14px; background:#fff; color:var(--ink); outline:0; font:inherit; font-size:17px; }
+.points-lookup input:focus { border-color:var(--teal); box-shadow:0 0 0 4px rgba(0,133,145,.1); }
+.points-lookup button { min-height:52px; padding:0 17px; border:0; border-radius:14px; background:var(--teal); color:#fff; font:inherit; font-size:13px; font-weight:900; cursor:pointer; }
+.points-lookup button:disabled { opacity:.65; cursor:wait; }
+.points-error { margin:12px 0 0; padding:11px 13px; border-radius:12px; background:#fff0ed; color:#9e241b; font-size:12px; font-weight:800; line-height:1.6; }
+.points-balance.real-balance { margin-bottom:0; text-align:center; }
+.points-balance.real-balance > span { font-size:12px; }
 .qr-demo { width: 66px; height: 66px; border: 5px solid var(--brown); border-radius: 12px; padding: 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
 .qr-demo span { background: var(--brown); border-radius: 2px; }
 .qr-demo span:nth-child(2), .qr-demo span:nth-child(3) { background: var(--gold); }
@@ -266,6 +277,8 @@ footer { padding: 30px 0 100px; background: var(--brown); color: #fff; }
   .loyalty-copy > p { font-size: 15px; }
   .loyalty-steps { text-align: right; }
   .account-card { padding: 20px; transform: none; border-radius: 24px; }
+  .points-lookup > div { grid-template-columns:1fr; }
+  .points-lookup button { width:100%; }
   .about-grid { gap: 45px; }
   .about-badge { width: min(370px, 90%); margin-inline: auto; }
   .about-copy { text-align: center; }
