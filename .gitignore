@@ -1,0 +1,6 @@
+waffle-capitano-github/node_modules/
+waffle-capitano-github/.next/
+waffle-capitano-github/.env*
+!waffle-capitano-github/.env.example
+dev-orders.log
+*.log

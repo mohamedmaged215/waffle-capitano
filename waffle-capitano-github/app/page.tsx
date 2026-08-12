@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { supabase } from "@/lib/supabase";
 
 const WHATSAPP_NUMBER = "201142013975";
 
@@ -14,6 +15,8 @@ type Product = {
   available: boolean;
   sort_order: number;
 };
+
+type CartItem = Product & { quantity: number };
 
 const categories = [
   { id: "all", label: "الكل" },
@@ -63,23 +66,17 @@ function whatsappUrl(message: string) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
 
-function WhatsAppLink({ children, className = "button primary", message }: { children: React.ReactNode; className?: string; message?: string }) {
+function OrderButton({ children, className = "button primary", onClick }: { children: React.ReactNode; className?: string; onClick: () => void }) {
   return (
-    <a
-      href={whatsappUrl(message ?? "السلام عليكم، عايز أطلب من وافل كابيتانو.")}
-      className={className}
-      target="_blank"
-      rel="noreferrer"
-      aria-label={`${children} — يفتح واتساب`}
-    >
+    <button type="button" className={className} onClick={onClick}>
       <span className="wa-dot" aria-hidden="true" />
       {children}
-      <span aria-hidden="true">↗</span>
-    </a>
+      <span aria-hidden="true">←</span>
+    </button>
   );
 }
 
-function Navbar() {
+function Navbar({ onOrder, cartCount }: { onOrder: () => void; cartCount: number }) {
   const [open, setOpen] = useState(false);
   const links = [
     ["الرئيسية", "#home"],
@@ -98,7 +95,7 @@ function Navbar() {
         <div className={`nav-links ${open ? "open" : ""}`}>
           {links.map(([label, href]) => <a key={href} href={href} onClick={() => setOpen(false)}>{label}</a>)}
         </div>
-        <WhatsAppLink className="button primary nav-order">اطلب دلوقتي</WhatsAppLink>
+        <OrderButton className="button primary nav-order" onClick={onOrder}>اطلب دلوقتي {cartCount > 0 && `(${cartCount})`}</OrderButton>
         <button className="menu-toggle" onClick={() => setOpen(!open)} aria-expanded={open} aria-label="فتح القائمة">
           <span /><span /><span />
         </button>
@@ -107,7 +104,7 @@ function Navbar() {
   );
 }
 
-function Hero() {
+function Hero({ onOrder }: { onOrder: () => void }) {
   return (
     <section className="hero" id="home">
       <div className="hero-orb orb-one" aria-hidden="true" />
@@ -118,7 +115,7 @@ function Hero() {
           <h1>مزاجك الحلو<br /><em>عند كابيتانو</em></h1>
           <p>وافل، فريسكا وديزرت معمولين بحب، بطعم مظبوط وأسعار واضحة. اختار طلبك وسيب الباقي علينا.</p>
           <div className="hero-actions">
-            <WhatsAppLink>اطلب دلوقتي على واتساب</WhatsAppLink>
+            <OrderButton onClick={onOrder}>اطلب دلوقتي على واتساب</OrderButton>
             <a className="button secondary" href="#menu">شوف المنيو <span aria-hidden="true">↓</span></a>
           </div>
           <div className="quick-facts" aria-label="معلومات سريعة">
@@ -145,9 +142,8 @@ function Hero() {
   );
 }
 
-function ProductCard({ product, index }: { product: Product; index: number }) {
+function ProductCard({ product, index, onAdd }: { product: Product; index: number; onAdd: (product: Product) => void }) {
   const category = categories.find((item) => item.id === product.category)?.label;
-  const message = `السلام عليكم، عايز أطلب ${product.name} بسعر ${product.price} جنيه.`;
   return (
     <article className="product-card" style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}>
       <div className="product-top">
@@ -157,13 +153,13 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
       <h3>{product.name}</h3>
       <div className="product-bottom">
         <p className="price"><strong>{product.price}</strong><span>جنيه</span></p>
-        <WhatsAppLink className="order-chip" message={message}>اطلب</WhatsAppLink>
+        <button type="button" className="order-chip" onClick={() => onAdd(product)}>أضف للطلب</button>
       </div>
     </article>
   );
 }
 
-function MenuSection() {
+function MenuSection({ onAdd }: { onAdd: (product: Product) => void }) {
   const [active, setActive] = useState("all");
   const visible = useMemo(() => products.filter((p) => p.available && (active === "all" || p.category === active)), [active]);
   return (
@@ -171,7 +167,7 @@ function MenuSection() {
       <div className="shell">
         <div className="section-heading reveal">
           <div><span className="section-kicker">منيو كابيتانو</span><h2>اختار اللي على مزاجك</h2></div>
-          <p>الأسعار بالجنيه المصري. دوس «اطلب» وهتلاقي اسم المنتج وسعره جاهزين على واتساب.</p>
+          <p>الأسعار بالجنيه المصري. دوس «أضف للطلب»، اكتب بياناتك، وبعدها ابعت الطلب بنفسك على واتساب.</p>
         </div>
         <div className="category-tabs" role="tablist" aria-label="أقسام المنيو">
           {categories.map((category) => (
@@ -181,7 +177,7 @@ function MenuSection() {
           ))}
         </div>
         <div className="product-grid" key={active}>
-          {visible.sort((a, b) => a.sort_order - b.sort_order).map((product, index) => <ProductCard key={product.id} product={product} index={index} />)}
+          {visible.sort((a, b) => a.sort_order - b.sort_order).map((product, index) => <ProductCard key={product.id} product={product} index={index} onAdd={onAdd} />)}
         </div>
       </div>
     </section>
@@ -233,7 +229,7 @@ function AboutSection() {
   );
 }
 
-function LocationSection() {
+function LocationSection({ onOrder }: { onOrder: () => void }) {
   return (
     <section className="section location" id="location">
       <div className="shell">
@@ -242,7 +238,7 @@ function LocationSection() {
             <span className="section-kicker light">مستنيينك</span>
             <h2>الحلو مكانه<br />في برنشت</h2>
             <p>تعالى اختار طلبك من المحل، أو ابعتلنا على واتساب وإحنا هنجهزهولك.</p>
-            <WhatsAppLink>ابدأ طلبك</WhatsAppLink>
+            <OrderButton onClick={onOrder}>ابدأ طلبك</OrderButton>
           </div>
           <div className="contact-list">
             <a href="https://www.google.com/maps/search/?api=1&query=%D8%A8%D8%B1%D9%86%D8%B4%D8%AA+%D9%85%D8%A7%D8%B1%D9%83%D8%AA+%D8%A7%D9%84%D8%AE%D8%A8%D9%8A%D8%B1%D9%8A" target="_blank" rel="noreferrer">
@@ -254,6 +250,128 @@ function LocationSection() {
         </div>
       </div>
     </section>
+  );
+}
+
+function CartDrawer({
+  open,
+  items,
+  onClose,
+  onChangeQuantity,
+  onClear,
+}: {
+  open: boolean;
+  items: CartItem[];
+  onClose: () => void;
+  onChangeQuantity: (id: string, quantity: number) => void;
+  onClear: () => void;
+}) {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
+
+  async function submitOrder(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+    if (items.length === 0) {
+      setError("اختار منتج واحد على الأقل من المنيو");
+      return;
+    }
+
+    setSubmitting(true);
+    const { data, error: orderError } = await supabase.rpc("dessert_create_order", {
+      customer_name_input: name.trim(),
+      customer_phone_input: phone.trim(),
+      customer_address_input: address.trim(),
+      order_items_input: items.map((item) => ({ product_id: item.id, quantity: item.quantity })),
+    });
+
+    if (orderError || !data?.[0]) {
+      setError("حصلت مشكلة بسيطة. راجع بياناتك وجرّب مرة تانية.");
+      setSubmitting(false);
+      return;
+    }
+
+    const savedOrder = data[0] as { order_number: number; order_total: number };
+    const itemLines = items.map((item) => `${item.quantity} × ${item.name} — ${item.price * item.quantity} جنيه`).join("\n");
+    const message = [
+      `السلام عليكم، ده طلب جديد من موقع وافل كابيتانو`,
+      `رقم الطلب: #${savedOrder.order_number}`,
+      `الاسم: ${name.trim()}`,
+      `الهاتف: ${phone.trim()}`,
+      `العنوان: ${address.trim()}`,
+      "",
+      "تفاصيل الطلب:",
+      itemLines,
+      "",
+      `الإجمالي: ${Number(savedOrder.order_total)} جنيه`,
+    ].join("\n");
+
+    onClear();
+    setSubmitting(false);
+    window.location.href = whatsappUrl(message);
+  }
+
+  if (!open) return null;
+
+  return (
+    <div className="cart-overlay" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+      <aside className="cart-drawer" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+        <div className="cart-header">
+          <div><small>خطوات بسيطة</small><h2 id="cart-title">طلبك</h2></div>
+          <button type="button" className="cart-close" onClick={onClose} aria-label="إغلاق">×</button>
+        </div>
+
+        {items.length === 0 ? (
+          <div className="empty-cart">
+            <span>🧇</span>
+            <h3>لسه ما اخترتش حاجة</h3>
+            <p>اقفل النافذة واختار اللي تحبه من المنيو.</p>
+            <button type="button" className="button primary" onClick={() => { onClose(); document.querySelector("#menu")?.scrollIntoView(); }}>اختار من المنيو</button>
+          </div>
+        ) : (
+          <form onSubmit={submitOrder} className="order-form">
+            <div className="cart-items">
+              {items.map((item) => (
+                <div className="cart-item" key={item.id}>
+                  <div><b>{item.name}</b><span>{item.price * item.quantity} جنيه</span></div>
+                  <div className="quantity-control" aria-label={`كمية ${item.name}`}>
+                    <button type="button" onClick={() => onChangeQuantity(item.id, item.quantity - 1)} aria-label="تقليل الكمية">−</button>
+                    <strong>{item.quantity}</strong>
+                    <button type="button" onClick={() => onChangeQuantity(item.id, item.quantity + 1)} aria-label="زيادة الكمية">+</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="cart-total"><span>الإجمالي</span><strong>{total} جنيه</strong></div>
+            <p className="form-help">اكتب بيانات بسيطة عشان نسجل طلبك ونجهزه بسرعة.</p>
+            <label className="field-label">اسمك
+              <input value={name} onChange={(event) => setName(event.target.value)} required minLength={2} maxLength={100} placeholder="مثال: محمد أحمد" autoComplete="name" />
+            </label>
+            <label className="field-label">رقم الموبايل
+              <input value={phone} onChange={(event) => setPhone(event.target.value)} required inputMode="tel" placeholder="01XXXXXXXXX" autoComplete="tel" dir="ltr" />
+            </label>
+            <label className="field-label">العنوان بالتفصيل
+              <textarea value={address} onChange={(event) => setAddress(event.target.value)} required minLength={4} maxLength={300} placeholder="القرية، الشارع، علامة مميزة" rows={3} />
+            </label>
+            {error && <p className="form-error" role="alert">{error}</p>}
+            <button className="button primary submit-order" type="submit" disabled={submitting}>
+              {submitting ? "جاري تسجيل الطلب..." : "سجّل الطلب وافتح واتساب"}
+            </button>
+            <p className="privacy-note">بعد التسجيل هيفتح واتساب، وإنت هتضغط إرسال بنفسك.</p>
+          </form>
+        )}
+      </aside>
+    </div>
   );
 }
 
@@ -270,6 +388,23 @@ function Footer() {
 }
 
 export default function Home() {
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cartOpen, setCartOpen] = useState(false);
+
+  function addToCart(product: Product) {
+    setCart((current) => {
+      const existing = current.find((item) => item.id === product.id);
+      if (existing) return current.map((item) => item.id === product.id ? { ...item, quantity: Math.min(item.quantity + 1, 20) } : item);
+      return [...current, { ...product, quantity: 1 }];
+    });
+    setCartOpen(true);
+  }
+
+  function changeQuantity(id: string, quantity: number) {
+    if (quantity <= 0) setCart((current) => current.filter((item) => item.id !== id));
+    else setCart((current) => current.map((item) => item.id === id ? { ...item, quantity: Math.min(quantity, 20) } : item));
+  }
+
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => entries.forEach((entry) => entry.isIntersecting && entry.target.classList.add("visible")), { threshold: 0.12 });
     document.querySelectorAll(".reveal").forEach((element) => observer.observe(element));
@@ -290,14 +425,15 @@ export default function Home() {
   return (
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusiness) }} />
-      <Navbar />
-      <Hero />
-      <MenuSection />
+      <Navbar onOrder={() => setCartOpen(true)} cartCount={cart.reduce((sum, item) => sum + item.quantity, 0)} />
+      <Hero onOrder={() => document.querySelector("#menu")?.scrollIntoView()} />
+      <MenuSection onAdd={addToCart} />
       <LoyaltySection />
       <AboutSection />
-      <LocationSection />
+      <LocationSection onOrder={() => setCartOpen(true)} />
       <Footer />
-      <WhatsAppLink className="floating-whatsapp" message="السلام عليكم، عايز أطلب من وافل كابيتانو."><span className="floating-label">اطلب على واتساب</span></WhatsAppLink>
+      <OrderButton className="floating-whatsapp" onClick={() => setCartOpen(true)}><span className="floating-label">طلبك {cart.length > 0 && `(${cart.reduce((sum, item) => sum + item.quantity, 0)})`}</span></OrderButton>
+      <CartDrawer open={cartOpen} items={cart} onClose={() => setCartOpen(false)} onChangeQuantity={changeQuantity} onClear={() => setCart([])} />
     </main>
   );
 }
