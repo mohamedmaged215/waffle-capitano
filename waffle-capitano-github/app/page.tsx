@@ -419,6 +419,7 @@ function Footer() {
 export default function Home() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
+  const [addedNotice, setAddedNotice] = useState("");
 
   function addToCart(product: Product) {
     setCart((current) => {
@@ -426,7 +427,7 @@ export default function Home() {
       if (existing) return current.map((item) => item.id === product.id ? { ...item, quantity: Math.min(item.quantity + 1, 20) } : item);
       return [...current, { ...product, quantity: 1 }];
     });
-    setCartOpen(true);
+    setAddedNotice(`تم إضافة «${product.name}» — كمل اختيارك`);
   }
 
   function changeQuantity(id: string, quantity: number) {
@@ -439,6 +440,12 @@ export default function Home() {
     document.querySelectorAll(".reveal").forEach((element) => observer.observe(element));
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (!addedNotice) return;
+    const timer = window.setTimeout(() => setAddedNotice(""), 2400);
+    return () => window.clearTimeout(timer);
+  }, [addedNotice]);
 
   const localBusiness = {
     "@context": "https://schema.org",
@@ -461,6 +468,7 @@ export default function Home() {
       <AboutSection />
       <LocationSection onOrder={() => setCartOpen(true)} />
       <Footer />
+      {addedNotice && <div className="cart-added-toast" role="status">✓ {addedNotice}</div>}
       <OrderButton className="floating-whatsapp" onClick={() => setCartOpen(true)}><span className="floating-label">طلبك {cart.length > 0 && `(${cart.reduce((sum, item) => sum + item.quantity, 0)})`}</span></OrderButton>
       <CartDrawer open={cartOpen} items={cart} onClose={() => setCartOpen(false)} onChangeQuantity={changeQuantity} onClear={() => setCart([])} />
     </main>

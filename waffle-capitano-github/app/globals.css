@@ -181,6 +181,7 @@ footer { padding: 30px 0 100px; background: var(--brown); color: #fff; }
 .footer-grid > p { text-align: left; margin: 0; color: #aa9389; font-size: 11px; }
 .floating-whatsapp { position: fixed; z-index: 45; left: 22px; bottom: 20px; min-height: 56px; padding: 0 18px; border-radius: 18px; display: flex; align-items: center; gap: 9px; color: #fff; background: var(--green); box-shadow: 0 16px 35px rgba(20,94,48,.3); font-size: 13px; font-weight: 900; animation: softPulse 3s ease-in-out infinite; }
 .floating-whatsapp .wa-dot { width: 12px; height: 12px; border: 3px solid #fff; background: transparent; }
+.cart-added-toast { position:fixed; z-index:46; left:22px; bottom:88px; max-width:min(360px,calc(100% - 28px)); padding:13px 16px; border-radius:14px; background:var(--brown); color:#fff; box-shadow:0 14px 35px rgba(59,27,18,.25); font-size:13px; font-weight:900; line-height:1.55; animation:cardIn .25s ease both; }
 
 .cart-overlay { position: fixed; z-index: 100; inset: 0; background: rgba(35,16,10,.58); backdrop-filter: blur(5px); display: flex; justify-content: flex-start; animation: overlayIn .2s ease both; }
 .cart-drawer { width: min(470px, 100%); height: 100%; overflow-y: auto; background: var(--paper); box-shadow: 25px 0 80px rgba(0,0,0,.24); padding: 24px; animation: drawerIn .28s cubic-bezier(.2,.7,.2,1) both; }
@@ -293,6 +294,7 @@ footer { padding: 30px 0 100px; background: var(--brown); color: #fff; }
   .footer-links { flex-wrap: wrap; justify-content: center; }
   .footer-grid > p { text-align: center; }
   .floating-whatsapp { inset: auto 14px 12px; justify-content: center; min-height: 58px; border-radius: 17px; }
+  .cart-added-toast { left:14px; right:14px; bottom:80px; max-width:none; text-align:center; }
   .cart-drawer { padding: 18px 14px 28px; }
   .cart-item { padding: 12px; }
   .cart-header { position: sticky; top: 0; z-index: 2; margin: -18px -14px 0; padding: 15px 14px; background: rgba(255,253,247,.96); backdrop-filter: blur(12px); }

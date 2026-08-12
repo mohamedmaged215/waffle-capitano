@@ -50,6 +50,7 @@
 .admin-order.status-cancelled { border-top-color:#8a817c; opacity:.78; }
 .order-heading { padding:17px 18px; display:flex; justify-content:space-between; align-items:flex-start; gap:12px; border-bottom:1px solid rgba(59,27,18,.08); }
 .order-heading > div { display:grid; gap:5px; }
+.order-heading .order-heading-actions { display:flex; align-items:center; gap:8px; }
 .order-number { color:var(--admin-brown); font-size:21px; font-weight:1000; }
 .order-heading small { color:#8b756c; }
 .status-badge { padding:7px 10px; border-radius:10px; font-size:11px; font-weight:900; }
@@ -58,6 +59,9 @@
 .status-badge.status-ready { background:#e3f6e9; color:#14773a; }
 .status-badge.status-delivered { background:#e2f3f3; color:#086f75; }
 .status-badge.status-cancelled { background:#eeeae8; color:#675b55; }
+.delete-order-x { min-width:35px; height:35px; padding:0 9px; border:1px solid #efc8c4; border-radius:10px; background:#fff5f3; color:var(--admin-red); font-size:23px; font-weight:900; cursor:pointer; }
+.delete-order-x.confirming { min-width:92px; color:#fff; background:var(--admin-red); font-size:11px; }
+.delete-order-x:disabled { opacity:.55; cursor:wait; }
 .customer-details { padding:15px 18px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 .customer-details p,.customer-details a { margin:0; display:grid; gap:4px; }
 .customer-details span { color:#8a746b; font-size:11px; }
@@ -71,7 +75,7 @@
 .admin-total { padding:16px 18px; display:flex; align-items:center; justify-content:space-between; }
 .admin-total span { color:#746057; font-size:13px; }
 .admin-total strong { color:var(--admin-red); font-size:24px; }
-.order-actions { padding:0 18px 18px; display:grid; grid-template-columns:1fr auto; gap:9px; }
+.order-actions { padding:0 18px 18px; display:grid; grid-template-columns:1fr; gap:9px; }
 .order-actions button { min-height:50px; padding:0 16px; border-radius:14px; font-weight:900; cursor:pointer; }
 .next-status { border:0; background:var(--admin-green); color:#fff; }
 .cancel-order { border:1px solid #e8c9c5; background:#fff6f5; color:#a92e24; }

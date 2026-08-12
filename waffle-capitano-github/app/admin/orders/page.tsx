@@ -30,7 +30,7 @@ type Order = {
   dessert_customers: { points_balance: number } | null;
 };
 
-type Filter = "all" | "new" | "preparing" | "ready" | "delivered" | "cancelled";
+type Filter = "all" | "new" | "delivered";
 
 const statusText: Record<OrderStatus, string> = {
   new: "طلب جديد",
@@ -44,22 +44,12 @@ const statusText: Record<OrderStatus, string> = {
 const filters: { id: Filter; label: string; icon: string }[] = [
   { id: "all", label: "كل الطلبات", icon: "📦" },
   { id: "new", label: "طلبات جديدة", icon: "🔔" },
-  { id: "preparing", label: "قيد التحضير", icon: "🟡" },
-  { id: "ready", label: "جاهزة", icon: "🟢" },
   { id: "delivered", label: "تم التسليم", icon: "✅" },
-  { id: "cancelled", label: "ملغاة", icon: "❌" },
 ];
-
-const nextAction: Partial<Record<OrderStatus, { label: string; status: OrderStatus }>> = {
-  new: { label: "تأكيد الطلب", status: "confirmed" },
-  confirmed: { label: "بدء التحضير", status: "preparing" },
-  preparing: { label: "الطلب جاهز", status: "ready" },
-  ready: { label: "تم التسليم", status: "delivered" },
-};
 
 function matchesFilter(order: Order, filter: Filter) {
   if (filter === "all") return true;
-  if (filter === "preparing") return order.status === "confirmed" || order.status === "preparing";
+  if (filter === "new") return !(["delivered", "cancelled"] as OrderStatus[]).includes(order.status);
   return order.status === filter;
 }
 
@@ -75,7 +65,7 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [busyOrder, setBusyOrder] = useState<number | null>(null);
-  const [confirmCancel, setConfirmCancel] = useState<number | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
   const [storeOpen, setStoreOpen] = useState(false);
 
   const loadOrders = useCallback(async (quiet = false) => {
@@ -121,20 +111,36 @@ export default function OrdersPage() {
     return orders.filter((order) => matchesFilter(order, target)).length;
   }
 
-  async function changeStatus(order: Order, status: OrderStatus) {
+  async function deliverOrder(order: Order) {
     setBusyOrder(order.id);
     setMessage("");
     const { data, error } = await supabase.rpc("dessert_update_order_status", {
       order_id_input: order.id,
-      new_status_input: status,
+      new_status_input: "delivered",
     });
     if (error) setMessage("لم يتم تحديث الطلب. حاول مرة تانية.");
     else {
       const result = data?.[0] as { points_added?: number } | undefined;
-      setMessage(status === "delivered" ? `تم التسليم وإضافة ${result?.points_added ?? 0} نقطة للعميل` : "تم تحديث الطلب بنجاح");
+      setMessage(`تم التسليم وإضافة ${result?.points_added ?? 0} نقطة للعميل`);
       await loadOrders(true);
     }
-    setConfirmCancel(null);
+    setBusyOrder(null);
+  }
+
+  async function deleteOrder(order: Order) {
+    setBusyOrder(order.id);
+    setMessage("");
+    const { data, error } = await supabase.rpc("dessert_delete_order", {
+      order_id_input: order.id,
+    });
+    if (error) setMessage("لم يتم حذف الطلب. حاول مرة تانية.");
+    else {
+      const result = data?.[0] as { points_removed?: number } | undefined;
+      const removed = result?.points_removed ?? 0;
+      setMessage(removed > 0 ? `تم حذف الطلب وسحب ${removed} نقطة من العميل` : "تم حذف الطلب");
+      await loadOrders(true);
+    }
+    setConfirmDelete(null);
     setBusyOrder(null);
   }
 
@@ -183,7 +189,16 @@ export default function OrdersPage() {
               <article className={`admin-order status-${order.status}`} key={order.id}>
                 <div className="order-heading">
                   <div><span className="order-number">طلب #{order.id}</span><small>{formatTime(order.created_at)}</small></div>
-                  <span className={`status-badge status-${order.status}`}>{statusText[order.status]}</span>
+                  <div className="order-heading-actions">
+                    <span className={`status-badge status-${order.status}`}>{statusText[order.status]}</span>
+                    <button
+                      type="button"
+                      className={`delete-order-x ${confirmDelete === order.id ? "confirming" : ""}`}
+                      disabled={busyOrder === order.id}
+                      onClick={() => confirmDelete === order.id ? deleteOrder(order) : setConfirmDelete(order.id)}
+                      aria-label={confirmDelete === order.id ? `تأكيد حذف الطلب ${order.id}` : `حذف الطلب ${order.id}`}
+                    >{confirmDelete === order.id ? "تأكيد الحذف" : "×"}</button>
+                  </div>
                 </div>
                 <div className="customer-details">
                   <p><span>العميل</span><b>{order.customer_name}</b></p>
@@ -198,19 +213,9 @@ export default function OrdersPage() {
                 ) : <div className="store-order-note">🛍️ شراء مباشر من المحل</div>}
                 <div className="admin-total"><span>الإجمالي</span><strong>{Number(order.total)} جنيه</strong></div>
                 <div className="order-actions">
-                  {nextAction[order.status] && (
-                    <button type="button" className="next-status" disabled={busyOrder === order.id} onClick={() => changeStatus(order, nextAction[order.status]!.status)}>
-                      {busyOrder === order.id ? "جاري التحديث..." : nextAction[order.status]!.label}
-                    </button>
-                  )}
                   {!(["delivered", "cancelled"] as OrderStatus[]).includes(order.status) && (
-                    <button
-                      type="button"
-                      className="cancel-order"
-                      disabled={busyOrder === order.id}
-                      onClick={() => confirmCancel === order.id ? changeStatus(order, "cancelled") : setConfirmCancel(order.id)}
-                    >
-                      {confirmCancel === order.id ? "اضغط مرة ثانية للتأكيد" : "إلغاء الطلب"}
+                    <button type="button" className="next-status" disabled={busyOrder === order.id} onClick={() => deliverOrder(order)}>
+                      {busyOrder === order.id ? "جاري التحديث..." : "تم التسليم"}
                     </button>
                   )}
                 </div>
