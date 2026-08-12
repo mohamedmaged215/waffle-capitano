@@ -394,7 +394,7 @@ function CartDrawer({
             </label>
             {error && <p className="form-error" role="alert">{error}</p>}
             <button className="button primary submit-order" type="submit" disabled={submitting}>
-              {submitting ? "جاري تسجيل الطلب..." : "سجّل الطلب وافتح واتساب"}
+              {submitting ? "جاري تسجيل الطلب..." : "مواصلة الطلب في واتساب"}
             </button>
             <p className="privacy-note">بعد التسجيل هيفتح واتساب، وإنت هتضغط إرسال بنفسك.</p>
           </form>

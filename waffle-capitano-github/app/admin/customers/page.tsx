@@ -24,6 +24,8 @@ type Customer = {
   dessert_orders: CustomerOrder[];
 };
 
+type RedemptionCustomer = Pick<Customer, "id" | "name" | "phone_display" | "points_balance">;
+
 function comparablePhone(value: string) {
   let digits = value.replace(/\D/g, "");
   if (digits.startsWith("0020")) digits = `0${digits.slice(4)}`;
@@ -41,6 +43,10 @@ export default function CustomersPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [redemptionCustomer, setRedemptionCustomer] = useState<RedemptionCustomer | null>(null);
+  const [pointsToUse, setPointsToUse] = useState("");
+  const [redemptionError, setRedemptionError] = useState("");
+  const [redeeming, setRedeeming] = useState(false);
 
   const loadCustomers = useCallback(async () => {
     setLoading(true);
@@ -75,6 +81,55 @@ export default function CustomersPage() {
   async function logout() {
     await supabase.auth.signOut();
     router.replace("/admin/login");
+  }
+
+  function openRedemption(customer: Customer) {
+    setRedemptionCustomer(customer);
+    setPointsToUse("");
+    setRedemptionError("");
+  }
+
+  function closeRedemption() {
+    if (redeeming) return;
+    setRedemptionCustomer(null);
+    setPointsToUse("");
+    setRedemptionError("");
+  }
+
+  async function redeemPoints(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!redemptionCustomer) return;
+
+    const requestedPoints = Number(pointsToUse);
+    if (!Number.isInteger(requestedPoints) || requestedPoints <= 0) {
+      setRedemptionError("اكتب عدد نقاط صحيح.");
+      return;
+    }
+    if (requestedPoints > redemptionCustomer.points_balance) {
+      setRedemptionError("رصيد العميل لا يكفي.");
+      return;
+    }
+
+    setRedeeming(true);
+    setRedemptionError("");
+    const { data, error } = await supabase.rpc("dessert_redeem_points", {
+      customer_id_input: redemptionCustomer.id,
+      points_input: requestedPoints,
+    });
+
+    if (error) {
+      setRedemptionError(error.message.includes("رصيد العميل") ? "رصيد العميل لا يكفي." : "تعذر استخدام النقاط. حاول مرة أخرى.");
+      setRedeeming(false);
+      return;
+    }
+
+    const result = data?.[0] as { points_used?: number; current_points?: number } | undefined;
+    setRedeeming(false);
+    setRedemptionCustomer(null);
+    setPointsToUse("");
+    setRedemptionError("");
+    await loadCustomers();
+    setMessage(`تم استخدام ${result?.points_used ?? requestedPoints} نقطة. الرصيد الحالي ${result?.current_points ?? 0} نقطة.`);
   }
 
   return (
@@ -119,13 +174,44 @@ export default function CustomersPage() {
                   <div className="customer-card-head"><div><small>رقم حساب العميل</small><a href={`tel:${customer.phone_display}`} dir="ltr">{customer.phone_display}</a></div><div className="customer-points"><strong>{customer.points_balance}</strong><span>نقطة</span></div></div>
                   <div className="customer-stats"><p><span>عدد العمليات</span><b>{orders.length}</b></p><p><span>تم تسليمها</span><b>{deliveredOrders.length}</b></p><p><span>إجمالي المستلم</span><b>{totalSpent} جنيه</b></p></div>
                   <div className="customer-names"><span>الأسماء المستخدمة</span><p>{names.join("، ")}</p></div>
-                  <div className="customer-card-foot"><span>آخر حركة: {formatDate(customer.updated_at)}</span><Link href="/admin/orders">العودة للطلبات</Link></div>
+                  <div className="customer-card-foot">
+                    <span>آخر حركة: {formatDate(customer.updated_at)}</span>
+                    <div className="customer-card-actions">
+                      <button type="button" onClick={() => openRedemption(customer)} disabled={customer.points_balance <= 0}>استخدام نقاط</button>
+                      <Link href="/admin/orders">العودة للطلبات</Link>
+                    </div>
+                  </div>
                 </article>
               );
             })}
           </div>
         )}
       </section>
+
+      {redemptionCustomer && (
+        <div className="admin-modal-backdrop">
+          <form className="store-modal redemption-modal" onSubmit={redeemPoints} role="dialog" aria-modal="true" aria-labelledby="redemption-title">
+            <div className="modal-title">
+              <div><small>⭐ نقاط العملاء</small><h2 id="redemption-title">استخدام نقاط</h2></div>
+              <button type="button" onClick={closeRedemption} aria-label="إغلاق">×</button>
+            </div>
+            <p>اكتب عدد النقاط التي استخدمها العميل فقط. لا توجد قيمة مالية للنقطة الآن.</p>
+            <div className="redemption-customer">
+              <div><span>العميل</span><b>{redemptionCustomer.name}</b></div>
+              <div><span>الهاتف</span><b dir="ltr">{redemptionCustomer.phone_display}</b></div>
+              <div><span>الرصيد الحالي</span><b>{redemptionCustomer.points_balance} نقطة</b></div>
+            </div>
+            <label htmlFor="points-to-use">عدد النقاط المستخدمة
+              <input id="points-to-use" value={pointsToUse} onChange={(event) => setPointsToUse(event.target.value)} type="number" inputMode="numeric" min="1" max={redemptionCustomer.points_balance} step="1" required placeholder="مثال: 2" />
+            </label>
+            {pointsToUse && Number(pointsToUse) > 0 && Number(pointsToUse) <= redemptionCustomer.points_balance ? (
+              <div className="points-preview">الرصيد بعد الاستخدام: <b>{redemptionCustomer.points_balance - Number(pointsToUse)} نقطة</b></div>
+            ) : null}
+            {redemptionError && <p className="admin-error" role="alert">{redemptionError}</p>}
+            <button className="admin-primary" type="submit" disabled={redeeming}>{redeeming ? "جاري الخصم..." : "تأكيد استخدام النقاط"}</button>
+          </form>
+        </div>
+      )}
     </main>
   );
 }
