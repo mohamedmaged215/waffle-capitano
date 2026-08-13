@@ -37,7 +37,7 @@ export default function LoginPage() {
   return (
     <main className="admin-login">
       <form className="login-card" onSubmit={login}>
-        <Image src="/waffle-capitano-logo.png" alt="وافل كابيتانو" width={100} height={100} priority unoptimized />
+        <Image src="/waffle-capitano-logo.jpeg" alt="وافل كابيتانو" width={100} height={100} priority unoptimized />
         <div><span>لوحة الموظف</span><h1>أهلاً بيك</h1><p>اكتب كلمة المرور للدخول للطلبات.</p></div>
         <label>كلمة المرور
           <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required placeholder="••••••••" autoComplete="current-password" />

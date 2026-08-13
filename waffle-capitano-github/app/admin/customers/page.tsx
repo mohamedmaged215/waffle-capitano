@@ -135,7 +135,7 @@ export default function CustomersPage() {
   return (
     <main className="orders-page">
       <header className="admin-header">
-        <div className="admin-brand"><Image src="/waffle-capitano-logo.png" alt="" width={52} height={52} unoptimized /><div><small>وافل كابيتانو</small><h1>⭐ نقاط العملاء</h1></div></div>
+        <div className="admin-brand"><Image src="/waffle-capitano-logo.jpeg" alt="" width={52} height={52} unoptimized /><div><small>وافل كابيتانو</small><h1>⭐ نقاط العملاء</h1></div></div>
         <div className="header-actions">
           <button type="button" onClick={loadCustomers}>تحديث</button>
           <button type="button" onClick={logout}>خروج</button>
