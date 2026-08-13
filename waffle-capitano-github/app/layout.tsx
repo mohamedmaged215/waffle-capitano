@@ -13,15 +13,15 @@ export const metadata: Metadata = {
   description: "منيو وافل كابيتانو في برنشت: وافل، فريسكا، كيك وديزرت. شوف الأسعار واطلب بسهولة على واتساب.",
   applicationName: "وافل كابيتانو",
   keywords: ["وافل كابيتانو", "وافل برنشت", "حلويات برنشت", "ديزرت", "فريسكا"],
-  icons: { icon: "/waffle-capitano-logo.jpeg", shortcut: "/waffle-capitano-logo.jpeg" },
+  icons: { icon: "/waffle-capitano-logo.png", shortcut: "/waffle-capitano-logo.png" },
   openGraph: {
     title: "وافل كابيتانو — الحلو × مكانه",
     description: "شوف المنيو والأسعار واطلب على واتساب.",
     locale: "ar_EG",
     type: "website",
-    images: [{ url: "/waffle-capitano-logo.jpeg", width: 1254, height: 1254, alt: "وافل كابيتانو" }],
+    images: [{ url: "/waffle-capitano-logo.png", width: 1254, height: 1254, alt: "وافل كابيتانو" }],
   },
-  twitter: { card: "summary_large_image", title: "وافل كابيتانو", description: "الحلو × مكانه", images: ["/waffle-capitano-logo.jpeg"] },
+  twitter: { card: "summary_large_image", title: "وافل كابيتانو", description: "الحلو × مكانه", images: ["/waffle-capitano-logo.png"] },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

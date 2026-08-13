@@ -93,7 +93,7 @@ function Navbar({ onOrder, cartCount }: { onOrder: () => void; cartCount: number
     <header className="site-header">
       <nav className="nav shell" aria-label="التنقل الرئيسي">
         <a href="#home" className="brand-mini" aria-label="وافل كابيتانو - الرئيسية">
-          <Image src="/waffle-capitano-logo.jpeg" alt="شعار وافل كابيتانو" width={92} height={92} sizes="46px" unoptimized />
+          <Image src="/waffle-capitano-logo.png" alt="شعار وافل كابيتانو" width={92} height={92} sizes="46px" unoptimized />
           <span><b>وافل كابيتانو</b><small>الحلو × مكانه</small></span>
         </a>
         <div className={`nav-links ${open ? "open" : ""}`}>
@@ -131,7 +131,7 @@ function Hero({ onOrder }: { onOrder: () => void }) {
         <div className="hero-visual reveal">
           <div className="logo-frame">
             <div className="frame-ring" aria-hidden="true" />
-            <Image src="/waffle-capitano-logo.jpeg" alt="وافل كابيتانو - الحلو مكانه" width={1254} height={1254} sizes="(max-width: 760px) 90vw, 470px" priority unoptimized />
+            <Image src="/waffle-capitano-logo.png" alt="وافل كابيتانو - الحلو مكانه" width={1254} height={1254} sizes="(max-width: 760px) 90vw, 470px" priority unoptimized />
             <div className="stamp">من قلب<br />برنشت</div>
           </div>
         </div>
@@ -423,7 +423,7 @@ function Footer() {
   return (
     <footer>
       <div className="shell footer-grid">
-        <a href="#home" className="footer-brand"><Image src="/waffle-capitano-logo.jpeg" alt="" width={104} height={104} sizes="52px" unoptimized /><span><b>وافل كابيتانو</b><small>#الحلو×مكانه</small></span></a>
+        <a href="#home" className="footer-brand"><Image src="/waffle-capitano-logo.png" alt="" width={104} height={104} sizes="52px" unoptimized /><span><b>وافل كابيتانو</b><small>#الحلو×مكانه</small></span></a>
         <div className="footer-links"><a href="#menu">المنيو</a><a href="#loyalty">النقاط</a><a href="#about">عننا</a><a href="#location">مكاننا</a></div>
         <p>© {new Date().getFullYear()} وافل كابيتانو. كل الحقوق محفوظة.</p>
       </div>
@@ -466,7 +466,7 @@ export default function Home() {
     "@context": "https://schema.org",
     "@type": "DessertShop",
     name: "وافل كابيتانو",
-    image: "/waffle-capitano-logo.jpeg",
+    image: "/waffle-capitano-logo.png",
     telephone: "+201142013975",
     address: { "@type": "PostalAddress", streetAddress: "برنشت، بجوار ماركت الخبيري", addressCountry: "EG" },
     openingHours: "Mo-Su 14:00-02:00",
