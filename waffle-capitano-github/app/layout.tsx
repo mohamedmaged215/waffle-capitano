@@ -19,11 +19,21 @@ export const metadata: Metadata = {
     description: "شوف المنيو والأسعار واطلب على واتساب.",
     locale: "ar_EG",
     type: "website",
-    images: [{ url: "/waffle-capitano-logo.jpeg", width: 1576, height: 1576, alt: "وافل كابيتانو" }],
+    images: [{ url: "/waffle-capitano-logo.jpeg", width: 1254, height: 1254, alt: "وافل كابيتانو" }],
   },
   twitter: { card: "summary_large_image", title: "وافل كابيتانو", description: "الحلو × مكانه", images: ["/waffle-capitano-logo.jpeg"] },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="ar" dir="rtl" data-scroll-behavior="smooth"><body>{children}</body></html>;
+  return (
+    <html lang="ar" dir="rtl" data-scroll-behavior="smooth">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+      </head>
+      <body>{children}</body>
+    </html>
+  );
 }

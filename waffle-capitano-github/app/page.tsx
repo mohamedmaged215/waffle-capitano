@@ -18,15 +18,19 @@ type Product = {
 
 type CartItem = Product & { quantity: number };
 
-const categories = [
-  { id: "all", label: "الكل" },
-  { id: "waffle", label: "وافل" },
-  { id: "freska", label: "فريسكا" },
-  { id: "cake", label: "كيك وديزرت" },
-  { id: "snacks", label: "سناكس" },
-  { id: "pancake", label: "بان كيك" },
-  { id: "extras", label: "إضافات" },
-];
+const categoryLabels: Record<string, string> = {
+  waffle: "وافل",
+  freska: "فريسكا",
+  pancake: "بان كيك",
+  extras: "إضافات",
+  cake: "كيك",
+  snacks: "سناكس",
+};
+
+const menuGroups = [
+  { id: "waffle", label: "منيو الوافل", categories: ["waffle", "freska", "pancake", "extras"] },
+  { id: "dessert", label: "منيو الديزرت", categories: ["cake", "snacks"] },
+] as const;
 
 const products: Product[] = [
   { id: "w1", name: "وافل كلاسيك شوكليت", category: "waffle", price: 80, available: true, sort_order: 1 },
@@ -111,8 +115,8 @@ function Hero({ onOrder }: { onOrder: () => void }) {
       <div className="hero-orb orb-two" aria-hidden="true" />
       <div className="shell hero-grid">
         <div className="hero-copy reveal">
-          <div className="eyebrow"><span /> طعم يخليك ترجع تاني</div>
-          <h1>مزاجك الحلو<br /><em>عند كابيتانو</em></h1>
+          <div className="eyebrow hero-hashtag"><span /><bdi dir="rtl">#آسفين_للي_بسببنا_تخنانين</bdi></div>
+          <h1><em className="hero-name">كابيتانو</em><small className="hero-slogan">الحلو <b>×</b> مكانه</small></h1>
           <p>وافل، فريسكا وديزرت معمولين بحب، بطعم مظبوط وأسعار واضحة. اختار طلبك وسيب الباقي علينا.</p>
           <div className="hero-actions">
             <OrderButton onClick={onOrder}>اطلب دلوقتي على واتساب</OrderButton>
@@ -127,15 +131,15 @@ function Hero({ onOrder }: { onOrder: () => void }) {
         <div className="hero-visual reveal">
           <div className="logo-frame">
             <div className="frame-ring" aria-hidden="true" />
-            <Image src="/waffle-capitano-logo.jpeg" alt="وافل كابيتانو - الحلو مكانه" width={1576} height={1576} sizes="(max-width: 760px) 90vw, 470px" priority />
+            <Image src="/waffle-capitano-logo.jpeg" alt="وافل كابيتانو - الحلو مكانه" width={1254} height={1254} sizes="(max-width: 760px) 90vw, 470px" priority />
             <div className="stamp">من قلب<br />برنشت</div>
           </div>
         </div>
       </div>
       <div className="hashtag-track" aria-label="شعار وافل كابيتانو">
         <div>
-          <span>#آسفين_للي_بيسيبنا_تخنانين</span><b>✦</b><span>#الحلو×مكانه</span><b>✦</b>
-          <span>#آسفين_للي_بيسيبنا_تخنانين</span><b>✦</b><span>#الحلو×مكانه</span><b>✦</b>
+          <bdi dir="rtl">#آسفين_للي_بسببنا_تخنانين</bdi><b>✦</b><bdi dir="rtl">#الحلو×مكانه</bdi><b>✦</b>
+          <bdi dir="rtl">#آسفين_للي_بسببنا_تخنانين</bdi><b>✦</b><bdi dir="rtl">#الحلو×مكانه</bdi><b>✦</b>
         </div>
       </div>
     </section>
@@ -143,7 +147,7 @@ function Hero({ onOrder }: { onOrder: () => void }) {
 }
 
 function ProductCard({ product, index, onAdd }: { product: Product; index: number; onAdd: (product: Product) => void }) {
-  const category = categories.find((item) => item.id === product.category)?.label;
+  const category = categoryLabels[product.category];
   return (
     <article className="product-card" style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}>
       <div className="product-top">
@@ -160,8 +164,18 @@ function ProductCard({ product, index, onAdd }: { product: Product; index: numbe
 }
 
 function MenuSection({ onAdd }: { onAdd: (product: Product) => void }) {
-  const [active, setActive] = useState("all");
-  const visible = useMemo(() => products.filter((p) => p.available && (active === "all" || p.category === active)), [active]);
+  const [active, setActive] = useState("waffle");
+  const activeGroup = menuGroups.find((group) => group.id === active) ?? menuGroups[0];
+  const visible = useMemo(() => {
+    const group = menuGroups.find((item) => item.id === active) ?? menuGroups[0];
+    return products
+      .filter((product) => product.available && group.categories.some((category) => category === product.category))
+      .sort((a, b) => {
+        const categoryOrder = group.categories as readonly string[];
+        const categoryDifference = categoryOrder.indexOf(a.category) - categoryOrder.indexOf(b.category);
+        return categoryDifference || a.sort_order - b.sort_order;
+      });
+  }, [active]);
   return (
     <section className="section menu-section" id="menu">
       <div className="shell">
@@ -169,15 +183,16 @@ function MenuSection({ onAdd }: { onAdd: (product: Product) => void }) {
           <div><span className="section-kicker">منيو كابيتانو</span><h2>اختار اللي على مزاجك</h2></div>
           <p>دوس «أضف للطلب»، كمل اختياراتك، وبعدها افتح طلبك واكتب بياناتك مرة واحدة.</p>
         </div>
-        <div className="category-tabs" role="tablist" aria-label="أقسام المنيو">
-          {categories.map((category) => (
-            <button key={category.id} role="tab" aria-selected={active === category.id} className={active === category.id ? "active" : ""} onClick={() => setActive(category.id)}>
-              {category.label}
+        <div className="category-tabs menu-main-tabs" role="tablist" aria-label="أقسام المنيو">
+          {menuGroups.map((group) => (
+            <button key={group.id} role="tab" aria-selected={active === group.id} className={active === group.id ? "active" : ""} onClick={() => setActive(group.id)}>
+              {group.label}
             </button>
           ))}
         </div>
+        <p className="menu-group-note" role="status">{activeGroup.id === "waffle" ? "وافل • فريسكا • بان كيك • إضافات" : "كيك وديزرت • سناكس"}</p>
         <div className="product-grid" key={active}>
-          {visible.sort((a, b) => a.sort_order - b.sort_order).map((product, index) => <ProductCard key={product.id} product={product} index={index} onAdd={onAdd} />)}
+          {visible.map((product, index) => <ProductCard key={product.id} product={product} index={index} onAdd={onAdd} />)}
         </div>
       </div>
     </section>

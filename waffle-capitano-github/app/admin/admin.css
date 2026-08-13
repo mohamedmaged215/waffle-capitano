@@ -1,4 +1,4 @@
-.admin-root { --admin-brown:#321810; --admin-teal:#006f78; --admin-gold:#f1ad00; --admin-green:#167a42; --admin-red:#c23b2d; --admin-bg:#eef2f3; min-height:100vh; background:var(--admin-bg); color:#24140f; font-family:Tahoma,"Segoe UI",Arial,sans-serif; }
+.admin-root { --admin-brown:#321810; --admin-teal:#006f78; --admin-gold:#f1ad00; --admin-green:#167a42; --admin-red:#c23b2d; --admin-bg:#eef2f3; min-height:100vh; background:var(--admin-bg); color:#24140f; font-family:inherit; }
 .admin-root * { box-sizing:border-box; }
 .admin-root button,.admin-root input { font:inherit; }
 .admin-login { min-height:100vh; padding:24px; display:grid; place-items:center; background:radial-gradient(circle at top right,rgba(255,189,36,.22),transparent 28%),linear-gradient(145deg,#fffaf0,#eff9f9); }
