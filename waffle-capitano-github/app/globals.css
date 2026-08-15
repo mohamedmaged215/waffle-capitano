@@ -98,6 +98,16 @@ img { display: block; max-width: 100%; }
 .product-card:nth-child(3n) { border-color: rgba(126,62,42,.16); background: linear-gradient(145deg, #faeee5, #ecd9cd); }
 .product-card:nth-child(3n)::before { background: linear-gradient(90deg, #a84a32, #e49a66); }
 .product-card:hover { transform: translateY(-5px); box-shadow: 0 20px 42px rgba(73,41,24,.16); border-color: rgba(0,97,107,.28); }
+.product-card-body { flex:1; display:flex; flex-direction:column; justify-content:space-between; }
+.product-card.has-product-image { min-height:350px; padding:8px; }
+.product-card.has-product-image::before { display:none; }
+.product-image { position:relative; aspect-ratio:16 / 9; overflow:hidden; border-radius:16px; background:#ead7b8; }
+.product-image::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(25,15,8,.08),transparent 44%,rgba(25,15,8,.06)); pointer-events:none; }
+.product-image img { object-fit:cover; }
+.product-image-badges { position:absolute; z-index:1; inset:12px 12px auto; }
+.product-image-badges .availability { padding:6px 10px; border-radius:999px; background:rgba(255,252,239,.94); color:#5f4f47; box-shadow:0 5px 12px rgba(44,25,15,.15); backdrop-filter:blur(7px); }
+.product-card.has-product-image .product-card-body { padding:14px 10px 8px; }
+.product-card.has-product-image h3 { margin:18px 0; }
 .product-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .product-category { color: #fff; background: var(--teal-dark); padding: 6px 10px; border-radius: 999px; font-size: 11px; font-weight: 900; box-shadow: 0 5px 12px rgba(0,97,107,.14); }
 .availability { color: #8b746b; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 5px; }
@@ -286,6 +296,9 @@ footer { padding: 30px 0 100px; background: var(--brown); color: #fff; }
   .menu-main-tabs button { min-width:0; min-height:50px; padding-inline:9px; font-size:14px; }
   .product-grid { grid-template-columns: 1fr; gap: 11px; }
   .product-card { min-height: 174px; padding: 18px; border-radius: 19px; }
+  .product-card.has-product-image { min-height:325px; padding:8px; border-radius:21px; }
+  .product-card.has-product-image .product-card-body { padding:13px 9px 8px; }
+  .product-card.has-product-image h3 { margin:16px 0; }
   .product-card:hover { transform: none; }
   .product-card h3 { font-size: 17px; margin: 20px 0; }
   .price strong { font-size: 28px; }

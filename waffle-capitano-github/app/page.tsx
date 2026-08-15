@@ -14,6 +14,7 @@ type Product = {
   description?: string;
   available: boolean;
   sort_order: number;
+  image_path?: string | null;
 };
 
 type CartItem = Product & { quantity: number };
@@ -32,7 +33,7 @@ const menuGroups = [
   { id: "dessert", label: "منيو الديزرت", categories: ["cake", "snacks"] },
 ] as const;
 
-const products: Product[] = [
+const fallbackProducts: Product[] = [
   { id: "w1", name: "وافل كلاسيك شوكليت", category: "waffle", price: 80, available: true, sort_order: 1 },
   { id: "w2", name: "وافل وايت شوكليت", category: "waffle", price: 85, available: true, sort_order: 2 },
   { id: "w3", name: "وافل إكسترا", category: "waffle", price: 90, available: true, sort_order: 3 },
@@ -65,6 +66,13 @@ const products: Product[] = [
   { id: "e2", name: "صوص للكتابة", category: "extras", price: 20, available: true, sort_order: 2 },
   { id: "e3", name: "فواكه", category: "extras", price: 10, available: true, sort_order: 3 },
 ];
+
+const PRODUCT_BUCKET = "dessert-products";
+
+function productImageUrl(path?: string | null) {
+  if (!path) return null;
+  return supabase.storage.from(PRODUCT_BUCKET).getPublicUrl(path).data.publicUrl;
+}
 
 function whatsappUrl(message: string) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
@@ -148,22 +156,34 @@ function Hero({ onOrder }: { onOrder: () => void }) {
 
 function ProductCard({ product, index, onAdd }: { product: Product; index: number; onAdd: (product: Product) => void }) {
   const category = categoryLabels[product.category];
+  const imageUrl = productImageUrl(product.image_path);
   return (
-    <article className="product-card" style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}>
-      <div className="product-top">
-        <span className="product-category">{category}</span>
-        <span className="availability"><i /> متاح</span>
-      </div>
-      <h3>{product.name}</h3>
-      <div className="product-bottom">
-        <p className="price"><strong>{product.price}</strong><span>جنيه</span></p>
-        <button type="button" className="order-chip" onClick={() => onAdd(product)}>أضف للطلب</button>
+    <article className={`product-card ${imageUrl ? "has-product-image" : ""}`} style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}>
+      {imageUrl && (
+        <div className="product-image">
+          <Image src={imageUrl} alt={product.name} fill sizes="(max-width: 760px) calc(100vw - 44px), 32vw" unoptimized />
+          <div className="product-top product-image-badges">
+            <span className="product-category">{category}</span>
+            <span className="availability"><i /> متاح</span>
+          </div>
+        </div>
+      )}
+      <div className="product-card-body">
+        {!imageUrl && <div className="product-top">
+          <span className="product-category">{category}</span>
+          <span className="availability"><i /> متاح</span>
+        </div>}
+        <h3>{product.name}</h3>
+        <div className="product-bottom">
+          <p className="price"><strong>{product.price}</strong><span>جنيه</span></p>
+          <button type="button" className="order-chip" onClick={() => onAdd(product)}>أضف للطلب</button>
+        </div>
       </div>
     </article>
   );
 }
 
-function MenuSection({ onAdd }: { onAdd: (product: Product) => void }) {
+function MenuSection({ products, onAdd }: { products: Product[]; onAdd: (product: Product) => void }) {
   const [active, setActive] = useState("waffle");
   const activeGroup = menuGroups.find((group) => group.id === active) ?? menuGroups[0];
   const visible = useMemo(() => {
@@ -175,7 +195,7 @@ function MenuSection({ onAdd }: { onAdd: (product: Product) => void }) {
         const categoryDifference = categoryOrder.indexOf(a.category) - categoryOrder.indexOf(b.category);
         return categoryDifference || a.sort_order - b.sort_order;
       });
-  }, [active]);
+  }, [active, products]);
   return (
     <section className="section menu-section" id="menu">
       <div className="shell">
@@ -435,6 +455,7 @@ export default function Home() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [addedNotice, setAddedNotice] = useState("");
+  const [menuProducts, setMenuProducts] = useState<Product[]>(fallbackProducts);
 
   function addToCart(product: Product) {
     setCart((current) => {
@@ -462,6 +483,27 @@ export default function Home() {
     return () => window.clearTimeout(timer);
   }, [addedNotice]);
 
+  useEffect(() => {
+    let active = true;
+    async function loadMenu() {
+      const { data, error } = await supabase
+        .from("dessert_products")
+        .select("id,name,category,price,available,sort_order,image_path")
+        .eq("available", true)
+        .order("category")
+        .order("sort_order");
+      if (!active || error || !data?.length) return;
+      const nextProducts = data.map((product) => ({ ...product, price: Number(product.price) })) as Product[];
+      setMenuProducts(nextProducts);
+      setCart((current) => current.flatMap((item) => {
+        const freshProduct = nextProducts.find((product) => product.id === item.id);
+        return freshProduct ? [{ ...freshProduct, quantity: item.quantity }] : [];
+      }));
+    }
+    loadMenu();
+    return () => { active = false; };
+  }, []);
+
   const localBusiness = {
     "@context": "https://schema.org",
     "@type": "DessertShop",
@@ -478,7 +520,7 @@ export default function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusiness) }} />
       <Navbar onOrder={() => setCartOpen(true)} cartCount={cart.reduce((sum, item) => sum + item.quantity, 0)} />
       <Hero onOrder={() => document.querySelector("#menu")?.scrollIntoView()} />
-      <MenuSection onAdd={addToCart} />
+      <MenuSection products={menuProducts} onAdd={addToCart} />
       <LoyaltySection />
       <AboutSection />
       <LocationSection onOrder={() => setCartOpen(true)} />

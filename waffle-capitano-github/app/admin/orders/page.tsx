@@ -162,6 +162,7 @@ export default function OrdersPage() {
       <section className="admin-content">
         <nav className="admin-module-nav" aria-label="أقسام لوحة الموظف">
           <Link className="active" href="/admin/orders">📦 الطلبات</Link>
+          <Link href="/admin/menu">🍽️ المنيو</Link>
           <Link href="/admin/customers">⭐ نقاط العملاء</Link>
           <Link href="/admin/revenue">💰 الإيرادات</Link>
         </nav>

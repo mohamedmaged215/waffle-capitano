@@ -110,6 +110,7 @@ export default function RevenuePage() {
       <section className="admin-content">
         <nav className="admin-module-nav" aria-label="أقسام لوحة الموظف">
           <Link href="/admin/orders">📦 الطلبات</Link>
+          <Link href="/admin/menu">🍽️ المنيو</Link>
           <Link href="/admin/customers">⭐ نقاط العملاء</Link>
           <Link className="active" href="/admin/revenue">💰 الإيرادات</Link>
         </nav>
