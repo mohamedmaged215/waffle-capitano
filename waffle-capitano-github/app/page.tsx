@@ -125,7 +125,7 @@ function Hero({ onOrder }: { onOrder: () => void }) {
         <div className="hero-copy reveal">
           <div className="eyebrow hero-hashtag"><span /><bdi dir="rtl">#آسفين_للي_بسببنا_تخنانين</bdi></div>
           <h1><em className="hero-name">كابيتانو</em><small className="hero-slogan">الحلو <b>×</b> مكانه</small></h1>
-          <p>وافل، فريسكا وديزرت معمولين بحب، بطعم مظبوط وأسعار واضحة. اختار طلبك وسيب الباقي علينا.</p>
+          <p>وافل، فريسكا وديزرت معمولين بحب، وطعم مظبوط . اختار طلبك وسيب الباقي علينا.</p>
           <div className="hero-actions">
             <OrderButton onClick={onOrder}>اطلب دلوقتي على واتساب</OrderButton>
             <a className="button secondary" href="#menu">شوف المنيو <span aria-hidden="true">↓</span></a>
