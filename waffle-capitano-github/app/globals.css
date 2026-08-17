@@ -90,7 +90,7 @@ img { display: block; max-width: 100%; }
 .menu-main-tabs { justify-content:center; position:static; width:min(560px,100%); margin:0 auto 12px; padding:6px; border:1px solid rgba(91,42,24,.12); border-radius:18px; background:rgba(255,248,234,.76); box-shadow:0 8px 24px rgba(83,47,27,.06); }
 .menu-main-tabs button { min-height:52px; height:auto; flex:1; justify-content:center; border:0; border-radius:13px; font-size:16px; }
 .menu-group-note { margin:0 0 25px; color:#7a6259; text-align:center; font-size:13px; font-weight:700; }
-.product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; scroll-margin-top: 155px; }
 .product-card { min-height: 208px; padding: 22px; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; border: 1px solid rgba(122,76,44,.18); border-radius: 22px; background: linear-gradient(145deg, #fff5dc, #f3e2c4); box-shadow: 0 10px 26px rgba(83,47,27,.09); animation: cardIn .42s both ease; transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
 .product-card::before { content: ""; position: absolute; inset: 0 0 auto; height: 5px; background: linear-gradient(90deg, var(--gold), #df7d21); }
 .product-card:nth-child(3n + 2) { border-color: rgba(0,97,107,.18); background: linear-gradient(145deg, #eef8f5, #dcecea); }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 
@@ -185,6 +185,7 @@ function ProductCard({ product, index, onAdd }: { product: Product; index: numbe
 
 function MenuSection({ products, onAdd }: { products: Product[]; onAdd: (product: Product) => void }) {
   const [active, setActive] = useState("waffle");
+  const productsStartRef = useRef<HTMLDivElement>(null);
   const activeGroup = menuGroups.find((group) => group.id === active) ?? menuGroups[0];
   const visible = useMemo(() => {
     const group = menuGroups.find((item) => item.id === active) ?? menuGroups[0];
@@ -196,6 +197,14 @@ function MenuSection({ products, onAdd }: { products: Product[]; onAdd: (product
         return categoryDifference || a.sort_order - b.sort_order;
       });
   }, [active, products]);
+
+  function changeMenu(groupId: string) {
+    setActive(groupId);
+    window.requestAnimationFrame(() => {
+      productsStartRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
   return (
     <section className="section menu-section" id="menu">
       <div className="shell">
@@ -205,13 +214,13 @@ function MenuSection({ products, onAdd }: { products: Product[]; onAdd: (product
         </div>
         <div className="category-tabs menu-main-tabs" role="tablist" aria-label="أقسام المنيو">
           {menuGroups.map((group) => (
-            <button key={group.id} role="tab" aria-selected={active === group.id} className={active === group.id ? "active" : ""} onClick={() => setActive(group.id)}>
+            <button key={group.id} role="tab" aria-selected={active === group.id} className={active === group.id ? "active" : ""} onClick={() => changeMenu(group.id)}>
               {group.label}
             </button>
           ))}
         </div>
         <p className="menu-group-note" role="status">{activeGroup.id === "waffle" ? "وافل • فريسكا • بان كيك • إضافات" : "كيك وديزرت • سناكس"}</p>
-        <div className="product-grid" key={active}>
+        <div className="product-grid" key={active} ref={productsStartRef}>
           {visible.map((product, index) => <ProductCard key={product.id} product={product} index={index} onAdd={onAdd} />)}
         </div>
       </div>
@@ -526,7 +535,7 @@ export default function Home() {
       <LocationSection onOrder={() => setCartOpen(true)} />
       <Footer />
       {addedNotice && <div className="cart-added-toast" role="status">✓ {addedNotice}</div>}
-      <OrderButton className="floating-whatsapp" onClick={() => setCartOpen(true)}><span className="floating-label">طلبك {cart.length > 0 && `(${cart.reduce((sum, item) => sum + item.quantity, 0)})`}</span></OrderButton>
+      {cart.length > 0 && <OrderButton className="floating-whatsapp" onClick={() => setCartOpen(true)}><span className="floating-label">طلبك ({cart.reduce((sum, item) => sum + item.quantity, 0)})</span></OrderButton>}
       <CartDrawer open={cartOpen} items={cart} onClose={() => setCartOpen(false)} onChangeQuantity={changeQuantity} onClear={() => setCart([])} />
     </main>
   );
