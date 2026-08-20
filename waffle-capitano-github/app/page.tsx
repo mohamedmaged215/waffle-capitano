@@ -468,7 +468,10 @@ function Footer() {
       <div className="shell footer-grid">
         <a href="#home" className="footer-brand"><Image src="/waffle-capitano-logo.jpeg" alt="" width={104} height={104} sizes="52px" unoptimized /><span><b>وافل كابيتانو</b><small>#الحلو×مكانه</small></span></a>
         <div className="footer-links"><a href="#menu">المنيو</a><a href="#loyalty">النقاط</a><a href="#about">عننا</a><a href="#location">مكاننا</a></div>
-        <p>© {new Date().getFullYear()} وافل كابيتانو. كل الحقوق محفوظة.</p>
+        <div className="footer-credits">
+          <p>© {new Date().getFullYear()} وافل كابيتانو. كل الحقوق محفوظة.</p>
+          <span className="dawly-badge" dir="ltr"><i aria-hidden="true" /> Protected by <b>DAWLY</b></span>
+        </div>
       </div>
     </footer>
   );
