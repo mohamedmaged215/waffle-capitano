@@ -15,6 +15,9 @@ type Product = {
   available: boolean;
   sort_order: number;
   image_path?: string | null;
+  image_position_x?: number;
+  image_position_y?: number;
+  image_zoom?: number;
 };
 
 type CartItem = Product & { quantity: number };
@@ -161,7 +164,18 @@ function ProductCard({ product, index, onAdd }: { product: Product; index: numbe
     <article className={`product-card ${imageUrl ? "has-product-image" : ""}`} style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}>
       {imageUrl && (
         <div className="product-image">
-          <Image src={imageUrl} alt={product.name} fill sizes="(max-width: 760px) calc(100vw - 44px), 32vw" unoptimized />
+          <Image
+            src={imageUrl}
+            alt={product.name}
+            fill
+            sizes="(max-width: 760px) calc(100vw - 44px), 32vw"
+            style={{
+              objectPosition: `${product.image_position_x ?? 50}% ${product.image_position_y ?? 50}%`,
+              transform: `scale(${product.image_zoom ?? 1})`,
+              transformOrigin: `${product.image_position_x ?? 50}% ${product.image_position_y ?? 50}%`,
+            }}
+            unoptimized
+          />
           <div className="product-top product-image-badges">
             <span className="product-category">{category}</span>
             <span className="availability"><i /> متاح</span>
@@ -497,7 +511,7 @@ export default function Home() {
     async function loadMenu() {
       const { data, error } = await supabase
         .from("dessert_products")
-        .select("id,name,category,price,available,sort_order,image_path")
+        .select("id,name,category,price,available,sort_order,image_path,image_position_x,image_position_y,image_zoom")
         .eq("available", true)
         .order("category")
         .order("sort_order");

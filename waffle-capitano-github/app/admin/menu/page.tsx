@@ -18,6 +18,9 @@ type Product = {
   available: boolean;
   sort_order: number;
   image_path: string | null;
+  image_position_x: number;
+  image_position_y: number;
+  image_zoom: number;
   updated_at: string;
 };
 
@@ -27,6 +30,9 @@ type ProductDraft = {
   category: string;
   available: boolean;
   image_path: string | null;
+  image_position_x: number;
+  image_position_y: number;
+  image_zoom: number;
 };
 
 type MenuFilter = "all" | "waffle" | "dessert";
@@ -46,6 +52,9 @@ const emptyDraft: ProductDraft = {
   category: "waffle",
   available: true,
   image_path: null,
+  image_position_x: 50,
+  image_position_y: 50,
+  image_zoom: 1,
 };
 
 function categoryLabel(category: string) {
@@ -138,7 +147,7 @@ export default function AdminMenuPage() {
 
     const { data, error } = await supabase
       .from("dessert_products")
-      .select("id,name,category,price,available,sort_order,image_path,updated_at")
+      .select("id,name,category,price,available,sort_order,image_path,image_position_x,image_position_y,image_zoom,updated_at")
       .order("category")
       .order("sort_order")
       .order("name");
@@ -183,6 +192,9 @@ export default function AdminMenuPage() {
       category: product.category,
       available: product.available,
       image_path: product.image_path,
+      image_position_x: Number(product.image_position_x ?? 50),
+      image_position_y: Number(product.image_position_y ?? 50),
+      image_zoom: Number(product.image_zoom ?? 1),
     });
     setImageFile(null);
     setRemoveImage(false);
@@ -204,7 +216,15 @@ export default function AdminMenuPage() {
     if (imagePreview) URL.revokeObjectURL(imagePreview);
     setImageFile(file);
     setImagePreview(file ? URL.createObjectURL(file) : null);
-    if (file) setRemoveImage(false);
+    if (file) {
+      setRemoveImage(false);
+      setDraft((current) => ({
+        ...current,
+        image_position_x: 50,
+        image_position_y: 50,
+        image_zoom: 1,
+      }));
+    }
   }
 
   async function uploadImage(productId: string, source: File) {
@@ -252,6 +272,9 @@ export default function AdminMenuPage() {
         available: draft.available,
         sort_order: editing?.sort_order ?? maxOrder + 1,
         image_path: imagePath,
+        image_position_x: Math.round(draft.image_position_x),
+        image_position_y: Math.round(draft.image_position_y),
+        image_zoom: Number(draft.image_zoom.toFixed(2)),
         updated_at: new Date().toISOString(),
       };
 
@@ -259,7 +282,7 @@ export default function AdminMenuPage() {
         ? supabase.from("dessert_products").update(payload).eq("id", productId)
         : supabase.from("dessert_products").insert(payload);
       const { data, error } = await query
-        .select("id,name,category,price,available,sort_order,image_path,updated_at")
+        .select("id,name,category,price,available,sort_order,image_path,image_position_x,image_position_y,image_zoom,updated_at")
         .single();
       if (error || !data) throw new Error("تعذر حفظ المنتج. جرّب مرة ثانية");
 
@@ -311,6 +334,11 @@ export default function AdminMenuPage() {
   }
 
   const currentImage = imagePreview ?? (!removeImage ? productImageUrl(draft.image_path) : null);
+  const currentImageStyle = {
+    objectPosition: `${draft.image_position_x}% ${draft.image_position_y}%`,
+    transform: `scale(${draft.image_zoom})`,
+    transformOrigin: `${draft.image_position_x}% ${draft.image_position_y}%`,
+  };
 
   return (
     <main className="orders-page menu-admin-page">
@@ -349,7 +377,7 @@ export default function AdminMenuPage() {
               return (
                 <article className={`admin-product-card ${product.available ? "" : "is-hidden"}`} key={product.id}>
                   <div className={`admin-product-media ${imageUrl ? "has-image" : ""}`}>
-                    {imageUrl ? <Image src={imageUrl} alt={product.name} fill sizes="(max-width: 700px) 44vw, 240px" unoptimized /> : <span aria-hidden="true">🧇</span>}
+                    {imageUrl ? <Image src={imageUrl} alt={product.name} fill sizes="(max-width: 700px) 44vw, 240px" style={{ objectPosition: `${product.image_position_x ?? 50}% ${product.image_position_y ?? 50}%`, transform: `scale(${product.image_zoom ?? 1})`, transformOrigin: `${product.image_position_x ?? 50}% ${product.image_position_y ?? 50}%` }} unoptimized /> : <span aria-hidden="true">🧇</span>}
                     <i>{categoryLabel(product.category)}</i>
                   </div>
                   <div className="admin-product-info">
@@ -376,13 +404,40 @@ export default function AdminMenuPage() {
             <div className="menu-editor-head"><div><small>{editing ? "تعديل منتج" : "منتج جديد"}</small><h2 id="menu-editor-title">{editing?.name ?? "إضافة منتج للمنيو"}</h2></div><button type="button" onClick={closeEditor} aria-label="إغلاق">×</button></div>
 
             <div className={`menu-image-picker ${currentImage ? "has-image" : ""}`}>
-              {currentImage ? <Image src={currentImage} alt="معاينة صورة المنتج" fill sizes="340px" unoptimized /> : <div><span>📷</span><b>صورة المنتج اختيارية</b><small>تقدر تضيفها الآن أو في أي وقت</small></div>}
+              {currentImage ? <Image src={currentImage} alt="معاينة الجزء الذي سيظهر للعميل" fill sizes="(max-width: 520px) calc(100vw - 76px), 410px" style={currentImageStyle} unoptimized /> : <div><span>📷</span><b>صورة المنتج اختيارية</b><small>تقدر تضيفها الآن أو في أي وقت</small></div>}
             </div>
             <div className="menu-image-actions">
               <label><input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => chooseImage(event.target.files?.[0] ?? null)} />{currentImage ? "تغيير الصورة" : "اختيار صورة"}</label>
               {currentImage && <button type="button" onClick={() => { chooseImage(null); setRemoveImage(true); }}>حذف الصورة</button>}
             </div>
             <p className="menu-image-help">سنصغّر الصورة تلقائيًا لتفتح بسرعة على الموبايل.</p>
+
+            {currentImage && (
+              <section className="image-framing" aria-labelledby="image-framing-title">
+                <div className="image-framing-head">
+                  <div><b id="image-framing-title">حدد الجزء الظاهر من الصورة</b><small>المعاينة فوق هي نفس شكل الصورة عند العميل</small></div>
+                  <button type="button" onClick={() => setDraft((current) => ({ ...current, image_position_x: 50, image_position_y: 50, image_zoom: 1 }))}>الوضع الطبيعي</button>
+                </div>
+
+                <div className="image-range">
+                  <span><label htmlFor="image-position-x">تحريك يمين ويسار</label><small>{Math.round(draft.image_position_x)}٪</small></span>
+                  <input id="image-position-x" dir="ltr" type="range" min="0" max="100" step="1" value={draft.image_position_x} onChange={(event) => setDraft((current) => ({ ...current, image_position_x: Number(event.target.value) }))} />
+                  <i><span>يسار</span><span>يمين</span></i>
+                </div>
+
+                <div className="image-range">
+                  <span><label htmlFor="image-position-y">تحريك أعلى وأسفل</label><small>{Math.round(draft.image_position_y)}٪</small></span>
+                  <input id="image-position-y" dir="ltr" type="range" min="0" max="100" step="1" value={draft.image_position_y} onChange={(event) => setDraft((current) => ({ ...current, image_position_y: Number(event.target.value) }))} />
+                  <i><span>أعلى</span><span>أسفل</span></i>
+                </div>
+
+                <div className="image-range">
+                  <span><label htmlFor="image-zoom">تقريب الصورة</label><small>{Math.round(draft.image_zoom * 100)}٪</small></span>
+                  <input id="image-zoom" dir="ltr" type="range" min="1" max="3" step="0.05" value={draft.image_zoom} onChange={(event) => setDraft((current) => ({ ...current, image_zoom: Number(event.target.value) }))} />
+                  <i><span>طبيعي</span><span>أقرب</span></i>
+                </div>
+              </section>
+            )}
 
             <label className="field-label">اسم المنتج
               <input value={draft.name} onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))} required minLength={2} maxLength={100} placeholder="مثال: وافل كلاسيك شوكليت" />

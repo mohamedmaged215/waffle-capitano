@@ -103,7 +103,7 @@ img { display: block; max-width: 100%; }
 .product-card.has-product-image::before { display:none; }
 .product-image { position:relative; aspect-ratio:16 / 9; overflow:hidden; border-radius:16px; background:#ead7b8; }
 .product-image::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(25,15,8,.08),transparent 44%,rgba(25,15,8,.06)); pointer-events:none; }
-.product-image img { object-fit:cover; }
+.product-image img { object-fit:cover; transition:transform .25s ease; }
 .product-image-badges { position:absolute; z-index:1; inset:12px 12px auto; }
 .product-image-badges .availability { padding:6px 10px; border-radius:999px; background:rgba(255,252,239,.94); color:#5f4f47; box-shadow:0 5px 12px rgba(44,25,15,.15); backdrop-filter:blur(7px); }
 .product-card.has-product-image .product-card-body { padding:14px 10px 8px; }

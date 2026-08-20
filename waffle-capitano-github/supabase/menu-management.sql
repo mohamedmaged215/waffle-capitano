@@ -5,6 +5,9 @@ begin;
 
 alter table public.dessert_products
   add column if not exists image_path text,
+  add column if not exists image_position_x smallint not null default 50,
+  add column if not exists image_position_y smallint not null default 50,
+  add column if not exists image_zoom numeric(3,2) not null default 1.00,
   add column if not exists updated_at timestamptz not null default now();
 
 do $$
@@ -23,6 +26,39 @@ begin
           and image_path !~ '(^|/)\.\.(/|$)'
         )
       );
+  end if;
+end $$;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conrelid = 'public.dessert_products'::regclass
+      and conname = 'dessert_products_image_position_x_check'
+  ) then
+    alter table public.dessert_products
+      add constraint dessert_products_image_position_x_check
+      check (image_position_x between 0 and 100);
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conrelid = 'public.dessert_products'::regclass
+      and conname = 'dessert_products_image_position_y_check'
+  ) then
+    alter table public.dessert_products
+      add constraint dessert_products_image_position_y_check
+      check (image_position_y between 0 and 100);
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conrelid = 'public.dessert_products'::regclass
+      and conname = 'dessert_products_image_zoom_check'
+  ) then
+    alter table public.dessert_products
+      add constraint dessert_products_image_zoom_check
+      check (image_zoom between 1.00 and 3.00);
   end if;
 end $$;
 
